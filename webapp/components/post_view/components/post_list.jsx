@@ -21,6 +21,7 @@ import * as ChannelActions from 'actions/channel_actions.jsx';
 import Constants from 'utils/constants.jsx';
 const ScrollTypes = Constants.ScrollTypes;
 
+import PostStore from 'stores/post_store.jsx';
 import PreferenceStore from 'stores/preference_store.jsx';
 
 import {FormattedDate, FormattedMessage} from 'react-intl';
@@ -94,6 +95,11 @@ export default class PostList extends React.Component {
             }, 0);
         }
         this.setState({unViewedCount});
+
+        if (this.props.channelId !== nextProps.channelId) {
+            PostStore.removePostDraftChangeListener(this.props.channelId, this.handlePostDraftChange);
+            PostStore.addPostDraftChangeListener(nextProps.channelId, this.handlePostDraftChange);
+        }
     }
 
     handleKeyDown(e) {
@@ -525,6 +531,16 @@ export default class PostList extends React.Component {
 
         window.addEventListener('resize', this.handleResize);
         window.addEventListener('keydown', this.handleKeyDown);
+
+        PostStore.addPostDraftChangeListener(this.props.channelId, this.handlePostDraftChange);
+    }
+
+    handlePostDraftChange = (draft) => {
+        // this.state.draft isn't used anywhere, but this will cause an update to the scroll position
+        // without causing two updates to trigger when something else changes
+        this.setState({
+            draft
+        });
     }
 
     componentWillUnmount() {
@@ -532,6 +548,8 @@ export default class PostList extends React.Component {
         window.removeEventListener('resize', this.handleResize);
         window.removeEventListener('keydown', this.handleKeyDown);
         this.scrollStopAction.cancel();
+
+        PostStore.removePostDraftChangeListener(this.handlePostDraftChange);
     }
 
     componentDidUpdate() {
@@ -543,13 +561,6 @@ export default class PostList extends React.Component {
     }
 
     render() {
-        if (this.props.postList == null) {
-            return <div/>;
-        }
-
-        const posts = this.props.postList.posts;
-        const order = this.props.postList.order;
-
         // Create intro message or top loadmore link
         let moreMessagesTop;
         if (this.props.showMoreMessagesTop) {
@@ -586,11 +597,17 @@ export default class PostList extends React.Component {
         }
 
         // Create post elements
-        const postElements = this.createPosts(posts, order);
-
+        let postElements = null;
         let topPostCreateAt = 0;
-        if (this.state.topPostId && this.props.postList.posts[this.state.topPostId]) {
-            topPostCreateAt = this.props.postList.posts[this.state.topPostId].create_at;
+        if (this.props.postList) {
+            const posts = this.props.postList.posts;
+            const order = this.props.postList.order;
+
+            postElements = this.createPosts(posts, order);
+
+            if (this.state.topPostId && this.props.postList.posts[this.state.topPostId]) {
+                topPostCreateAt = this.props.postList.posts[this.state.topPostId].create_at;
+            }
         }
 
         return (
@@ -639,6 +656,7 @@ PostList.defaultProps = {
 PostList.propTypes = {
     postList: React.PropTypes.object,
     profiles: React.PropTypes.object,
+    channelId: React.PropTypes.string.isRequired,
     channel: React.PropTypes.object,
     currentUser: React.PropTypes.object,
     scrollPostId: React.PropTypes.string,
