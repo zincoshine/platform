@@ -2,18 +2,18 @@
 // See License.txt for license information.
 
 import $ from 'jquery';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import * as GlobalActions from 'actions/global_actions.jsx';
-import SuggestionStore from 'stores/suggestion_store.jsx';
 import {FormattedMessage} from 'react-intl';
 
-import React from 'react';
+import SuggestionStore from 'stores/suggestion_store.jsx';
 
 export default class SuggestionList extends React.Component {
     static propTypes = {
         suggestionId: React.PropTypes.string.isRequired,
         location: React.PropTypes.string,
-        renderDividers: React.PropTypes.bool
+        renderDividers: React.PropTypes.bool,
+        onCompleteWord: React.PropTypes.func.isRequired
     };
 
     static defaultProps = {
@@ -27,7 +27,6 @@ export default class SuggestionList extends React.Component {
 
         this.getContent = this.getContent.bind(this);
 
-        this.handleItemClick = this.handleItemClick.bind(this);
         this.handleSuggestionsChanged = this.handleSuggestionsChanged.bind(this);
 
         this.scrollToItem = this.scrollToItem.bind(this);
@@ -63,10 +62,6 @@ export default class SuggestionList extends React.Component {
 
     getContent() {
         return $(ReactDOM.findDOMNode(this.refs.content));
-    }
-
-    handleItemClick(term, matchedPretext) {
-        GlobalActions.emitCompleteWordSuggestion(this.props.suggestionId, term, matchedPretext);
     }
 
     handleSuggestionsChanged() {
@@ -143,7 +138,7 @@ export default class SuggestionList extends React.Component {
                     term={term}
                     matchedPretext={this.state.matchedPretext[i]}
                     isSelection={isSelection}
-                    onClick={this.handleItemClick}
+                    onClick={this.props.onCompleteWord}
                 />
             );
         }

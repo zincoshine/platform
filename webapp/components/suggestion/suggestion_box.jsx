@@ -35,12 +35,10 @@ export default class SuggestionBox extends React.Component {
     }
 
     componentDidMount() {
-        SuggestionStore.addCompleteWordListener(this.suggestionId, this.handleCompleteWord);
         SuggestionStore.addPretextChangedListener(this.suggestionId, this.handlePretextChanged);
     }
 
     componentWillUnmount() {
-        SuggestionStore.removeCompleteWordListener(this.suggestionId, this.handleCompleteWord);
         SuggestionStore.removePretextChangedListener(this.suggestionId, this.handlePretextChanged);
 
         SuggestionStore.unregisterSuggestionBox(this.suggestionId);
@@ -159,6 +157,8 @@ export default class SuggestionBox extends React.Component {
                 provider.handleCompleteWord(term, matchedPretext);
             }
         }
+
+        GlobalActions.emitCompleteWordSuggestion(this.suggestionId);
     }
 
     handleKeyDown(e) {
@@ -170,7 +170,7 @@ export default class SuggestionBox extends React.Component {
                 GlobalActions.emitSelectNextSuggestion(this.suggestionId);
                 e.preventDefault();
             } else if (e.which === KeyCodes.ENTER || e.which === KeyCodes.TAB) {
-                GlobalActions.emitCompleteWordSuggestion(this.suggestionId);
+                this.handleCompleteWord(SuggestionStore.getSelection(this.suggestionId), SuggestionStore.getSelectedMatchedPretext(this.suggestionId));
                 this.props.onKeyDown(e);
                 e.preventDefault();
             } else if (e.which === KeyCodes.ESCAPE) {
@@ -259,6 +259,7 @@ export default class SuggestionBox extends React.Component {
                     suggestionId={this.suggestionId}
                     location={listStyle}
                     renderDividers={renderDividers}
+                    onCompleteWord={this.handleCompleteWord}
                 />
             </div>
         );
