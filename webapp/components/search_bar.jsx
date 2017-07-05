@@ -305,6 +305,11 @@ export default class SearchBar extends React.Component {
             clearClass += ' visible';
         }
 
+        let formClassName = 'search__form';
+        if (this.state.focused) {
+            formClassName += ' search__form--hovered';
+        }
+
         return (
             <div>
                 <div
@@ -315,7 +320,7 @@ export default class SearchBar extends React.Component {
                 </div>
                 <form
                     role='form'
-                    className='search__form'
+                    className={formClassName}
                     onSubmit={this.handleSubmit}
                     style={{overflow: 'visible'}}
                     autoComplete='off'
