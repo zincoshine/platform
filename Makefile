@@ -375,7 +375,7 @@ build-client:
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) build
 
-package: build build-client
+package: build-linux build-client
 	@ echo Packaging mattermost
 
 	@# Remove any old files
@@ -420,27 +420,27 @@ endif
 
 	@# Make osx package
 	@# Copy binary
-ifeq ($(BUILDER_GOOS_GOARCH),"darwin_amd64")
-	cp $(GOPATH)/bin/platform $(DIST_PATH)/bin # from native bin dir, not cross-compiled
-else
-	cp $(GOPATH)/bin/darwin_amd64/platform $(DIST_PATH)/bin # from cross-compiled bin dir
-endif
-	@# Package
-	tar -C dist -czf $(DIST_PATH)-$(BUILD_TYPE_NAME)-osx-amd64.tar.gz mattermost
-	@# Cleanup
-	rm -f $(DIST_PATH)/bin/platform
+#ifeq ($(BUILDER_GOOS_GOARCH),"darwin_amd64")
+#	cp $(GOPATH)/bin/platform $(DIST_PATH)/bin # from native bin dir, not cross-compiled
+#else
+#	cp $(GOPATH)/bin/darwin_amd64/platform $(DIST_PATH)/bin # from cross-compiled bin dir
+#endif
+#	@# Package
+#	tar -C dist -czf $(DIST_PATH)-$(BUILD_TYPE_NAME)-osx-amd64.tar.gz mattermost
+#	@# Cleanup
+#	rm -f $(DIST_PATH)/bin/platform
 
-	@# Make windows package
-	@# Copy binary
-ifeq ($(BUILDER_GOOS_GOARCH),"windows_amd64")
-	cp $(GOPATH)/bin/platform.exe $(DIST_PATH)/bin # from native bin dir, not cross-compiled
-else
-	cp $(GOPATH)/bin/windows_amd64/platform.exe $(DIST_PATH)/bin # from cross-compiled bin dir
-endif
-	@# Package
-	cd $(DIST_ROOT) && zip -9 -r -q -l mattermost-$(BUILD_TYPE_NAME)-windows-amd64.zip mattermost && cd ..
-	@# Cleanup
-	rm -f $(DIST_PATH)/bin/platform.exe
+#	@# Make windows package
+#	@# Copy binary
+#ifeq ($(BUILDER_GOOS_GOARCH),"windows_amd64")
+#	cp $(GOPATH)/bin/platform.exe $(DIST_PATH)/bin # from native bin dir, not cross-compiled
+#else
+#	cp $(GOPATH)/bin/windows_amd64/platform.exe $(DIST_PATH)/bin # from cross-compiled bin dir
+#endif
+#	@# Package
+#	cd $(DIST_ROOT) && zip -9 -r -q -l mattermost-$(BUILD_TYPE_NAME)-windows-amd64.zip mattermost && cd ..
+#	@# Cleanup
+#	rm -f $(DIST_PATH)/bin/platform.exe
 
 	@# Make linux package
 	@# Copy binary

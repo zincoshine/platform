@@ -139,9 +139,11 @@ export function getChannelDisplayName(channel) {
 }
 
 export function showCreateOption(channelType, isTeamAdmin, isSystemAdmin) {
+    /*
     if (global.window.mm_license.IsLicensed !== 'true') {
         return true;
     }
+    */
 
     if (channelType === Constants.OPEN_CHANNEL) {
         if (global.window.mm_config.RestrictPublicChannelCreation === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
@@ -149,6 +151,10 @@ export function showCreateOption(channelType, isTeamAdmin, isSystemAdmin) {
         } else if (global.window.mm_config.RestrictPublicChannelCreation === Constants.PERMISSIONS_TEAM_ADMIN && !(isTeamAdmin || isSystemAdmin)) {
             return false;
         }
+	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
+		//by default return false
+		return false;
+	}
     } else if (channelType === Constants.PRIVATE_CHANNEL) {
         if (global.window.mm_config.RestrictPrivateChannelCreation === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
@@ -161,10 +167,12 @@ export function showCreateOption(channelType, isTeamAdmin, isSystemAdmin) {
 }
 
 export function showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin) {
+    /*
     if (global.window.mm_license.IsLicensed !== 'true') {
         // policies are only enforced in enterprise editions
         return true;
     }
+    */
 
     if (channel.type === Constants.OPEN_CHANNEL) {
         if (global.window.mm_config.RestrictPublicChannelManagement === Constants.PERMISSIONS_CHANNEL_ADMIN && !(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
@@ -176,6 +184,10 @@ export function showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSy
         if (global.window.mm_config.RestrictPublicChannelManagement === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
         }
+	if(!(isChannelAdmin && isTeamAdmin && isSystemAdmin)) {
+		//by default return false
+		return false;
+	}
     } else if (channel.type === Constants.PRIVATE_CHANNEL) {
         if (global.window.mm_config.RestrictPrivateChannelManagement === Constants.PERMISSIONS_CHANNEL_ADMIN && !(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
             return false;
@@ -192,10 +204,12 @@ export function showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSy
 }
 
 export function showDeleteOptionForCurrentUser(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin) {
+    /*
     if (global.window.mm_license.IsLicensed !== 'true') {
         // policies are only enforced in enterprise editions
         return true;
     }
+    */
 
     if (ChannelStore.isDefault(channel)) {
         // can't delete default channels, no matter who you are
@@ -212,6 +226,10 @@ export function showDeleteOptionForCurrentUser(channel, isChannelAdmin, isTeamAd
         if (global.window.mm_config.RestrictPublicChannelDeletion === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
         }
+	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
+		//by default return false
+		return false;
+	}
     } else if (channel.type === Constants.PRIVATE_CHANNEL) {
         if (global.window.mm_config.RestrictPrivateChannelDeletion === Constants.PERMISSIONS_CHANNEL_ADMIN && !(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
             return false;
@@ -222,15 +240,22 @@ export function showDeleteOptionForCurrentUser(channel, isChannelAdmin, isTeamAd
         if (global.window.mm_config.RestrictPrivateChannelDeletion === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
         }
+	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
+		//by default return false
+		return false;
+	}
+
     }
 
     return true;
 }
 
 export function canManageMembers(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin) {
+    /*
     if (global.window.mm_license.IsLicensed !== 'true') {
         return true;
     }
+    */
 
     if (channel.type === Constants.PRIVATE_CHANNEL) {
         if (global.window.mm_config.RestrictPrivateChannelManageMembers === Constants.PERMISSIONS_CHANNEL_ADMIN && !(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
@@ -243,8 +268,12 @@ export function canManageMembers(channel, isChannelAdmin, isTeamAdmin, isSystemA
             return false;
         }
     }
-
-    return true;
+    //Change by Partha
+    if(!(isSystemAdmin && isTeamAdmin && isChannelAdmin)) {
+	return false;
+    } else {
+	return false;
+    }
 }
 
 export function buildGroupChannelName(channelId) {

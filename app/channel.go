@@ -406,6 +406,7 @@ func UpdateChannelMemberNotifyProps(data map[string]string, channelId string, us
 }
 
 func DeleteChannel(channel *model.Channel, userId string) *model.AppError {
+	l4g.Debug(utils.T("in app/DeleteChannel"))
 	uc := Srv.Store.User().Get(userId)
 	ihc := Srv.Store.Webhook().GetIncomingByChannel(channel.Id)
 	ohc := Srv.Store.Webhook().GetOutgoingByChannel(channel.Id, -1, -1)
@@ -420,58 +421,65 @@ func DeleteChannel(channel *model.Channel, userId string) *model.AppError {
 		user := uresult.Data.(*model.User)
 		incomingHooks := ihcresult.Data.([]*model.IncomingWebhook)
 		outgoingHooks := ohcresult.Data.([]*model.OutgoingWebhook)
+		//ADDED CODE BY PARTHA
+		l4g.Debug(utils.T("#####user.Roles: " + user.Roles))
+		if strings.Contains(user.Roles,"system_admin") {
+			if channel.DeleteAt > 0 {
+				err := model.NewLocAppError("deleteChannel", "api.channel.delete_channel.deleted.app_error", nil, "")
+				err.StatusCode = http.StatusBadRequest
+				return err
+			}
 
-		if channel.DeleteAt > 0 {
+			if channel.Name == model.DEFAULT_CHANNEL {
+				err := model.NewLocAppError("deleteChannel", "api.channel.delete_channel.cannot.app_error", map[string]interface{}{"Channel": model.DEFAULT_CHANNEL}, "")
+				err.StatusCode = http.StatusBadRequest
+				return err
+			}
+
+			T := utils.GetUserTranslations(user.Locale)
+
+			post := &model.Post{
+				ChannelId: channel.Id,
+				Message:   fmt.Sprintf(T("api.channel.delete_channel.archived"), user.Username),
+				Type:      model.POST_CHANNEL_DELETED,
+				UserId:    userId,
+				Props: model.StringInterface{
+					"username": user.Username,
+				},
+			}
+
+			if _, err := CreatePost(post, channel.TeamId, false); err != nil {
+				l4g.Error(utils.T("api.channel.delete_channel.failed_post.error"), err)
+			}
+
+			now := model.GetMillis()
+			for _, hook := range incomingHooks {
+				if result := <-Srv.Store.Webhook().DeleteIncoming(hook.Id, now); result.Err != nil {
+					l4g.Error(utils.T("api.channel.delete_channel.incoming_webhook.error"), hook.Id)
+				}
+				InvalidateCacheForWebhook(hook.Id)
+			}
+
+			for _, hook := range outgoingHooks {
+				if result := <-Srv.Store.Webhook().DeleteOutgoing(hook.Id, now); result.Err != nil {
+					l4g.Error(utils.T("api.channel.delete_channel.outgoing_webhook.error"), hook.Id)
+				}
+			}
+
+			if dresult := <-Srv.Store.Channel().Delete(channel.Id, model.GetMillis()); dresult.Err != nil {
+				return dresult.Err
+			}
+			InvalidateCacheForChannel(channel)
+
+			message := model.NewWebSocketEvent(model.WEBSOCKET_EVENT_CHANNEL_DELETED, channel.TeamId, "", "", nil)
+			message.Add("channel_id", channel.Id)
+
+			Publish(message)
+		} else {
 			err := model.NewLocAppError("deleteChannel", "api.channel.delete_channel.deleted.app_error", nil, "")
 			err.StatusCode = http.StatusBadRequest
 			return err
 		}
-
-		if channel.Name == model.DEFAULT_CHANNEL {
-			err := model.NewLocAppError("deleteChannel", "api.channel.delete_channel.cannot.app_error", map[string]interface{}{"Channel": model.DEFAULT_CHANNEL}, "")
-			err.StatusCode = http.StatusBadRequest
-			return err
-		}
-
-		T := utils.GetUserTranslations(user.Locale)
-
-		post := &model.Post{
-			ChannelId: channel.Id,
-			Message:   fmt.Sprintf(T("api.channel.delete_channel.archived"), user.Username),
-			Type:      model.POST_CHANNEL_DELETED,
-			UserId:    userId,
-			Props: model.StringInterface{
-				"username": user.Username,
-			},
-		}
-
-		if _, err := CreatePost(post, channel.TeamId, false); err != nil {
-			l4g.Error(utils.T("api.channel.delete_channel.failed_post.error"), err)
-		}
-
-		now := model.GetMillis()
-		for _, hook := range incomingHooks {
-			if result := <-Srv.Store.Webhook().DeleteIncoming(hook.Id, now); result.Err != nil {
-				l4g.Error(utils.T("api.channel.delete_channel.incoming_webhook.error"), hook.Id)
-			}
-			InvalidateCacheForWebhook(hook.Id)
-		}
-
-		for _, hook := range outgoingHooks {
-			if result := <-Srv.Store.Webhook().DeleteOutgoing(hook.Id, now); result.Err != nil {
-				l4g.Error(utils.T("api.channel.delete_channel.outgoing_webhook.error"), hook.Id)
-			}
-		}
-
-		if dresult := <-Srv.Store.Channel().Delete(channel.Id, model.GetMillis()); dresult.Err != nil {
-			return dresult.Err
-		}
-		InvalidateCacheForChannel(channel)
-
-		message := model.NewWebSocketEvent(model.WEBSOCKET_EVENT_CHANNEL_DELETED, channel.TeamId, "", "", nil)
-		message.Add("channel_id", channel.Id)
-
-		Publish(message)
 	}
 
 	return nil
