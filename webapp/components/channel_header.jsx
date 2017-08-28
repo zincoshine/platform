@@ -531,7 +531,7 @@ export default class ChannelHeader extends React.Component {
                         className='divider'
                     />
                 );
-		/*
+
                 if (ChannelUtils.canManageMembers(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin)) {
                     dropdownContents.push(
                         <li
@@ -572,7 +572,6 @@ export default class ChannelHeader extends React.Component {
                         </li>
                     );
                 } else {
-		*/
                     dropdownContents.push(
                         <li
                             key='view_members'
@@ -591,7 +590,7 @@ export default class ChannelHeader extends React.Component {
                             </a>
                         </li>
                     );
-                //}
+                }
             }
 
             if (ChannelUtils.showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin)) {
@@ -639,7 +638,6 @@ export default class ChannelHeader extends React.Component {
                         </a>
                     </li>
                 );
-		/*
                 dropdownContents.push(
                     <li
                         key='rename_channel'
@@ -658,7 +656,6 @@ export default class ChannelHeader extends React.Component {
                         </a>
                     </li>
                 );
-		*/
             }
 
             if (ChannelUtils.showDeleteOptionForCurrentUser(channel, isChannelAdmin, isTeamAdmin, isSystemAdmin)) {
