@@ -151,7 +151,7 @@ export function showCreateOption(channelType, isTeamAdmin, isSystemAdmin) {
         } else if (global.window.mm_config.RestrictPublicChannelCreation === Constants.PERMISSIONS_TEAM_ADMIN && !(isTeamAdmin || isSystemAdmin)) {
             return false;
         }
-	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
+	if(!(isTeamAdmin || isSystemAdmin)) {
 		//by default return false
 		return false;
 	}
@@ -184,7 +184,7 @@ export function showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSy
         if (global.window.mm_config.RestrictPublicChannelManagement === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
         }
-	if(!(isChannelAdmin && isTeamAdmin && isSystemAdmin)) {
+	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
 		//by default return false
 		return false;
 	}
@@ -198,6 +198,10 @@ export function showManagementOptions(channel, isChannelAdmin, isTeamAdmin, isSy
         if (global.window.mm_config.RestrictPrivateChannelManagement === Constants.PERMISSIONS_SYSTEM_ADMIN && !isSystemAdmin) {
             return false;
         }
+	if(!(isChannelAdmin || isTeamAdmin || isSystemAdmin)) {
+		//by default return false
+		return false;
+	}
     }
 
     return true;
@@ -268,12 +272,7 @@ export function canManageMembers(channel, isChannelAdmin, isTeamAdmin, isSystemA
             return false;
         }
     }
-    //Change by Partha
-    if(!(isSystemAdmin && isTeamAdmin && isChannelAdmin)) {
-	return false;
-    } else {
-	return false;
-    }
+    return isSystemAdmin;	
 }
 
 export function buildGroupChannelName(channelId) {
