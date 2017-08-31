@@ -170,7 +170,8 @@ export default class Post extends React.PureComponent {
         }
 
         if (isSystemMessage) {
-            className += ' post--system';
+            //className += ' post--system';
+            className += ' post--system--hidden';
             sameUserClass = '';
             currentUserCss = '';
             postType = '';

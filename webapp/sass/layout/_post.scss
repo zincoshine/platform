@@ -647,12 +647,23 @@
     position: relative;
     word-wrap: break-word;
 
+    &.post--system--hidden {
+        .post__header {
+            .col__reply {
+                min-width: 0;
+            }
+        }
+	visibility: hidden;
+    }
+
+
     &.post--system {
         .post__header {
             .col__reply {
                 min-width: 0;
             }
         }
+	visibility: hidden;
     }
 
     &:hover {

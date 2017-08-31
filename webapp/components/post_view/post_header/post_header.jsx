@@ -137,23 +137,24 @@ export default class PostHeader extends React.PureComponent {
             colon = (<strong className='colon'>{':'}</strong>);
         }
 
-        return (
-            <div className='post__header'>
-                <div className='col col__name'>{userProfile}{colon}</div>
-                {botIndicator}
-                <div className='col'>
-                    <PostInfo
-                        post={post}
-                        handleCommentClick={this.props.handleCommentClick}
-                        handleDropdownOpened={this.props.handleDropdownOpened}
-                        compactDisplay={this.props.compactDisplay}
-                        lastPostCount={this.props.lastPostCount}
-                        replyCount={this.props.replyCount}
-                        consecutivePostByUser={this.props.consecutivePostByUser}
-                        getPostList={this.props.getPostList}
-                    />
-                </div>
-            </div>
-        );
+
+	return (
+	    <div className='post__header'>
+	        <div className='col col__name'>{userProfile}{colon}</div>
+	        {botIndicator}
+	        <div className='col'>
+	            <PostInfo
+	                post={post}
+	                handleCommentClick={this.props.handleCommentClick}
+	                handleDropdownOpened={this.props.handleDropdownOpened}
+	                compactDisplay={this.props.compactDisplay}
+	                lastPostCount={this.props.lastPostCount}
+	                replyCount={this.props.replyCount}
+	                consecutivePostByUser={this.props.consecutivePostByUser}
+	                getPostList={this.props.getPostList}
+	            />
+	        </div>
+	    </div>
+	);
     }
 }
